@@ -1,12 +1,6 @@
 package net.minecraft.server;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
@@ -16,9 +10,9 @@ public class RegionFile {
 
     private static final byte[] a = new byte[4096];
     private final File b;
-    private RandomAccessFile c;
     private final int[] d = new int[1024];
     private final int[] e = new int[1024];
+    private RandomAccessFile c;
     private ArrayList f;
     private int g;
     private long h;
@@ -244,7 +238,7 @@ public class RegionFile {
                 }
             }
 
-            this.b(i, j, (int) (MinecraftServer.ar() / 1000L));
+            this.b(i, j, (int) (MinecraftServer.now() / 1000L));
         } catch (IOException ioexception) {
             ioexception.printStackTrace();
         }

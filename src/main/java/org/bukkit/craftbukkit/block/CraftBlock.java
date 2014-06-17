@@ -1,29 +1,12 @@
 package org.bukkit.craftbukkit.block;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BlockCocoa;
-import net.minecraft.server.BlockRedstoneWire;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.EnumSkyBlock;
-import net.minecraft.server.GameProfileSerializer;
-import net.minecraft.server.Item;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.TileEntitySkull;
-
+import net.minecraft.server.*;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
+import org.bukkit.block.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
@@ -32,13 +15,18 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BlockVector;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class CraftBlock implements Block {
+    private static final Biome BIOME_MAPPING[];
+    private static final BiomeBase BIOMEBASE_MAPPING[];
     private final CraftChunk chunk;
     private final int x;
     private final int y;
     private final int z;
-    private static final Biome BIOME_MAPPING[];
-    private static final BiomeBase BIOMEBASE_MAPPING[];
 
     public CraftBlock(CraftChunk chunk, int x, int y, int z) {
         this.x = x;
@@ -47,12 +35,71 @@ public class CraftBlock implements Block {
         this.chunk = chunk;
     }
 
-    private net.minecraft.server.Block getNMSBlock() {
-        return CraftMagicNumbers.getBlock(this); // TODO: UPDATE THIS
-    }
-
     private static net.minecraft.server.Block getNMSBlock(int type) {
         return CraftMagicNumbers.getBlock(type);
+    }
+
+    /**
+     * Notch uses a 0-5 to mean DOWN, UP, NORTH, SOUTH, WEST, EAST
+     * in that order all over. This method is convenience to convert for us.
+     *
+     * @return BlockFace the BlockFace represented by this number
+     */
+    public static BlockFace notchToBlockFace(int notch) {
+        switch (notch) {
+            case 0:
+                return BlockFace.DOWN;
+            case 1:
+                return BlockFace.UP;
+            case 2:
+                return BlockFace.NORTH;
+            case 3:
+                return BlockFace.SOUTH;
+            case 4:
+                return BlockFace.WEST;
+            case 5:
+                return BlockFace.EAST;
+            default:
+                return BlockFace.SELF;
+        }
+    }
+
+    public static int blockFaceToNotch(BlockFace face) {
+        switch (face) {
+            case DOWN:
+                return 0;
+            case UP:
+                return 1;
+            case NORTH:
+                return 2;
+            case SOUTH:
+                return 3;
+            case WEST:
+                return 4;
+            case EAST:
+                return 5;
+            default:
+                return 7; // Good as anything here, but technically invalid
+        }
+    }
+
+    public static Biome biomeBaseToBiome(BiomeBase base) {
+        if (base == null) {
+            return null;
+        }
+
+        return BIOME_MAPPING[base.id];
+    }
+
+    public static BiomeBase biomeToBiomeBase(Biome bio) {
+        if (bio == null) {
+            return null;
+        }
+        return BIOMEBASE_MAPPING[bio.ordinal()];
+    }
+
+    private net.minecraft.server.Block getNMSBlock() {
+        return CraftMagicNumbers.getBlock(this); // TODO: UPDATE THIS
     }
 
     public World getWorld() {
@@ -96,10 +143,6 @@ public class CraftBlock implements Block {
         return chunk;
     }
 
-    public void setData(final byte data) {
-        chunk.getHandle().world.setData(x, y, z, data, 3);
-    }
-
     public void setData(final byte data, boolean applyPhysics) {
         if (applyPhysics) {
             chunk.getHandle().world.setData(x, y, z, data, 3);
@@ -112,8 +155,8 @@ public class CraftBlock implements Block {
         return (byte) chunk.getHandle().getData(this.x & 0xF, this.y & 0xFF, this.z & 0xF);
     }
 
-    public void setType(final Material type) {
-        setTypeId(type.getId());
+    public void setData(final byte data) {
+        chunk.getHandle().world.setData(x, y, z, data, 3);
     }
 
     public boolean setTypeId(final int type) {
@@ -140,6 +183,10 @@ public class CraftBlock implements Block {
         return Material.getMaterial(getTypeId());
     }
 
+    public void setType(final Material type) {
+        setTypeId(type.getId());
+    }
+
     @Deprecated
     @Override
     public int getTypeId() {
@@ -157,7 +204,6 @@ public class CraftBlock implements Block {
     public byte getLightFromBlocks() {
         return (byte) chunk.getHandle().getBrightness(EnumSkyBlock.BLOCK, this.x & 0xF, this.y & 0xFF, this.z & 0xF);
     }
-
 
     public Block getFace(final BlockFace face) {
         return getRelative(face, 1);
@@ -184,9 +230,9 @@ public class CraftBlock implements Block {
 
         for (BlockFace face : values) {
             if ((this.getX() + face.getModX() == block.getX()) &&
-                (this.getY() + face.getModY() == block.getY()) &&
-                (this.getZ() + face.getModZ() == block.getZ())
-            ) {
+                    (this.getY() + face.getModY() == block.getY()) &&
+                    (this.getZ() + face.getModZ() == block.getZ())
+                    ) {
                 return face;
             }
         }
@@ -199,86 +245,42 @@ public class CraftBlock implements Block {
         return "CraftBlock{" + "chunk=" + chunk + ",x=" + x + ",y=" + y + ",z=" + z + ",type=" + getType() + ",data=" + getData() + '}';
     }
 
-    /**
-     * Notch uses a 0-5 to mean DOWN, UP, NORTH, SOUTH, WEST, EAST
-     * in that order all over. This method is convenience to convert for us.
-     *
-     * @return BlockFace the BlockFace represented by this number
-     */
-    public static BlockFace notchToBlockFace(int notch) {
-        switch (notch) {
-        case 0:
-            return BlockFace.DOWN;
-        case 1:
-            return BlockFace.UP;
-        case 2:
-            return BlockFace.NORTH;
-        case 3:
-            return BlockFace.SOUTH;
-        case 4:
-            return BlockFace.WEST;
-        case 5:
-            return BlockFace.EAST;
-        default:
-            return BlockFace.SELF;
-        }
-    }
-
-    public static int blockFaceToNotch(BlockFace face) {
-        switch (face) {
-        case DOWN:
-            return 0;
-        case UP:
-            return 1;
-        case NORTH:
-            return 2;
-        case SOUTH:
-            return 3;
-        case WEST:
-            return 4;
-        case EAST:
-            return 5;
-        default:
-            return 7; // Good as anything here, but technically invalid
-        }
-    }
-
     public BlockState getState() {
         Material material = getType();
 
         switch (material) {
-        case SIGN:
-        case SIGN_POST:
-        case WALL_SIGN:
-            return new CraftSign(this);
-        case CHEST:
-        case TRAPPED_CHEST:
-            return new CraftChest(this);
-        case BURNING_FURNACE:
-        case FURNACE:
-            return new CraftFurnace(this);
-        case DISPENSER:
-            return new CraftDispenser(this);
-        case DROPPER:
-            return new CraftDropper(this);
-        case HOPPER:
-            return new CraftHopper(this);
-        case MOB_SPAWNER:
-            return new CraftCreatureSpawner(this);
-        case NOTE_BLOCK:
-            return new CraftNoteBlock(this);
-        case JUKEBOX:
-            return new CraftJukebox(this);
-        case BREWING_STAND:
-            return new CraftBrewingStand(this);
-        case SKULL:
-            return new CraftSkull(this);
-        case COMMAND:
-            return new CraftCommandBlock(this);
-        case BEACON:
-            return new CraftBeacon(this);
-        default:
-            return new CraftBlockState(this);
+            case SIGN:
+            case SIGN_POST:
+            case WALL_SIGN:
+                return new CraftSign(this);
+            case CHEST:
+            case TRAPPED_CHEST:
+                return new CraftChest(this);
+            case BURNING_FURNACE:
+            case FURNACE:
+                return new CraftFurnace(this);
+            case DISPENSER:
+                return new CraftDispenser(this);
+            case DROPPER:
+                return new CraftDropper(this);
+            case HOPPER:
+                return new CraftHopper(this);
+            case MOB_SPAWNER:
+                return new CraftCreatureSpawner(this);
+            case NOTE_BLOCK:
+                return new CraftNoteBlock(this);
+            case JUKEBOX:
+                return new CraftJukebox(this);
+            case BREWING_STAND:
+                return new CraftBrewingStand(this);
+            case SKULL:
+                return new CraftSkull(this);
+            case COMMAND:
+                return new CraftCommandBlock(this);
+            case BEACON:
+                return new CraftBeacon(this);
+            default:
+                return new CraftBlockState(this);
         }
     }
 
@@ -288,21 +290,6 @@ public class CraftBlock implements Block {
 
     public void setBiome(Biome bio) {
         getWorld().setBiome(x, z, bio);
-    }
-
-    public static Biome biomeBaseToBiome(BiomeBase base) {
-        if (base == null) {
-            return null;
-        }
-
-        return BIOME_MAPPING[base.id];
-    }
-
-    public static BiomeBase biomeToBiomeBase(Biome bio) {
-        if (bio == null) {
-            return null;
-        }
-        return BIOMEBASE_MAPPING[bio.ordinal()];
     }
 
     public double getTemperature() {
@@ -354,12 +341,18 @@ public class CraftBlock implements Block {
         int power = 0;
         BlockRedstoneWire wire = Blocks.REDSTONE_WIRE;
         net.minecraft.server.World world = chunk.getHandle().world;
-        if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0)) power = wire.getPower(world, x, y - 1, z, power);
-        if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1)) power = wire.getPower(world, x, y + 1, z, power);
-        if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(x + 1, y, z, 2)) power = wire.getPower(world, x + 1, y, z, power);
-        if ((face == BlockFace.WEST || face == BlockFace.SELF) && world.isBlockFacePowered(x - 1, y, z, 3)) power = wire.getPower(world, x - 1, y, z, power);
-        if ((face == BlockFace.NORTH || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z - 1, 4)) power = wire.getPower(world, x, y, z - 1, power);
-        if ((face == BlockFace.SOUTH || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z + 1, 5)) power = wire.getPower(world, x, y, z - 1, power);
+        if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0))
+            power = wire.getPower(world, x, y - 1, z, power);
+        if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1))
+            power = wire.getPower(world, x, y + 1, z, power);
+        if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(x + 1, y, z, 2))
+            power = wire.getPower(world, x + 1, y, z, power);
+        if ((face == BlockFace.WEST || face == BlockFace.SELF) && world.isBlockFacePowered(x - 1, y, z, 3))
+            power = wire.getPower(world, x - 1, y, z, power);
+        if ((face == BlockFace.NORTH || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z - 1, 4))
+            power = wire.getPower(world, x, y, z - 1, power);
+        if ((face == BlockFace.SOUTH || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z + 1, 5))
+            power = wire.getPower(world, x, y, z - 1, power);
         return power > 0 ? power : (face == BlockFace.SELF ? isBlockIndirectlyPowered() : isBlockFaceIndirectlyPowered(face)) ? 15 : 0;
     }
 
@@ -527,7 +520,7 @@ public class CraftBlock implements Block {
         /* Sanity check - we should have a record for each record in the BiomeBase.a table */
         /* Helps avoid missed biomes when we upgrade bukkit to new code with new biomes */
         for (int i = 0; i < BIOME_MAPPING.length; i++) {
-            if ((BiomeBase.getBiome(i) != null) && (BIOME_MAPPING[i] == null)) {
+            if ((BiomeBase.biomes[i] != null) && (BIOME_MAPPING[i] == null)) {
                 throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + ", " + BiomeBase.getBiome(i) + "]");
             }
             if (BIOME_MAPPING[i] != null) {  /* Build reverse mapping for setBiome */

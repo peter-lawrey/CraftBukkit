@@ -7,27 +7,32 @@ abstract class WorldGenVillagePiece extends StructurePiece {
 
     protected int k = -1;
     private int a;
-    private boolean b;
+    private boolean sandy;
 
-    public WorldGenVillagePiece() {}
+    public WorldGenVillagePiece() {
+    }
 
-    protected WorldGenVillagePiece(WorldGenVillageStartPiece worldgenvillagestartpiece, int i) {
+    protected WorldGenVillagePiece(WorldGenVillageStartPiece startPiece, int i) {
         super(i);
-        if (worldgenvillagestartpiece != null) {
-            this.b = worldgenvillagestartpiece.b;
+        if (startPiece != null) {
+            this.sandy = startPiece.b;
         }
+    }
+
+    protected static boolean a(StructureBoundingBox structureboundingbox) {
+        return structureboundingbox != null && structureboundingbox.b > 10;
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
         nbttagcompound.setInt("HPos", this.k);
         nbttagcompound.setInt("VCount", this.a);
-        nbttagcompound.setBoolean("Desert", this.b);
+        nbttagcompound.setBoolean("Desert", this.sandy);
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
         this.k = nbttagcompound.getInt("HPos");
         this.a = nbttagcompound.getInt("VCount");
-        this.b = nbttagcompound.getBoolean("Desert");
+        this.sandy = nbttagcompound.getBoolean("Desert");
     }
 
     protected StructurePiece a(WorldGenVillageStartPiece worldgenvillagestartpiece, List list, Random random, int i, int j) {
@@ -88,10 +93,6 @@ abstract class WorldGenVillagePiece extends StructurePiece {
         }
     }
 
-    protected static boolean a(StructureBoundingBox structureboundingbox) {
-        return structureboundingbox != null && structureboundingbox.b > 10;
-    }
-
     protected void a(World world, StructureBoundingBox structureboundingbox, int i, int j, int k, int l) {
         if (this.a < l) {
             for (int i1 = this.a; i1 < l; ++i1) {
@@ -117,7 +118,7 @@ abstract class WorldGenVillagePiece extends StructurePiece {
     }
 
     protected Block b(Block block, int i) {
-        if (this.b) {
+        if (this.sandy) {
             if (block == Blocks.LOG || block == Blocks.LOG2) {
                 return Blocks.SANDSTONE;
             }
@@ -147,7 +148,7 @@ abstract class WorldGenVillagePiece extends StructurePiece {
     }
 
     protected int c(Block block, int i) {
-        if (this.b) {
+        if (this.sandy) {
             if (block == Blocks.LOG || block == Blocks.LOG2) {
                 return 0;
             }
@@ -164,20 +165,20 @@ abstract class WorldGenVillagePiece extends StructurePiece {
         return i;
     }
 
-    protected void a(World world, Block block, int i, int j, int k, int l, StructureBoundingBox structureboundingbox) {
-        Block block1 = this.b(block, i);
-        int i1 = this.c(block, i);
+    protected void a(World world, Block block, int o, int x, int y, int z, StructureBoundingBox box) {
+        Block block1 = this.b(block, o);
+        int i1 = this.c(block, o);
 
-        super.a(world, block1, i1, j, k, l, structureboundingbox);
+        super.a(world, block1, i1, x, y, z, box);
     }
 
-    protected void a(World world, StructureBoundingBox structureboundingbox, int i, int j, int k, int l, int i1, int j1, Block block, Block block1, boolean flag) {
+    protected void a(World world, StructureBoundingBox box, int x1, int y1, int z1, int x2, int y2, int z2, Block block, Block block1, boolean flag) {
         Block block2 = this.b(block, 0);
         int k1 = this.c(block, 0);
         Block block3 = this.b(block1, 0);
         int l1 = this.c(block1, 0);
 
-        super.a(world, structureboundingbox, i, j, k, l, i1, j1, block2, k1, block3, l1, flag);
+        super.a(world, box, x1, y1, z1, x2, y2, z2, block2, k1, block3, l1, flag);
     }
 
     protected void b(World world, Block block, int i, int j, int k, int l, StructureBoundingBox structureboundingbox) {

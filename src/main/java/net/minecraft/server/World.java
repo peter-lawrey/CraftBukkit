@@ -1,119 +1,81 @@
 package net.minecraft.server;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
-// CraftBukkit start
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.util.LongHashSet;
-import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.util.LongHashSet;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.generator.ChunkGenerator;
+
+import java.util.*;
+import java.util.concurrent.Callable;
+
+// CraftBukkit start
 // CraftBukkit end
 
 public abstract class World implements IBlockAccess {
 
+    public final PersistentVillage villages;
+    public final MethodProfiler methodProfiler;
+    protected final int l = 1013904223;
+    protected final IDataManager dataManager;
+    protected final VillageSiege siegeManager = new VillageSiege(this);
+    private final Calendar J = Calendar.getInstance();
+    // CraftBukkit start
+    private final CraftWorld world;
     public boolean d;
     public List entityList = new ArrayList();
-    protected List f = new ArrayList();
     public Set tileEntityList = new HashSet(); // CraftBukkit - ArrayList -> HashSet
-    private List a = new ArrayList();
-    private List b = new ArrayList();
     public List players = new ArrayList();
     public List i = new ArrayList();
-    private long c = 16777215L;
     public int j;
-    protected int k = (new Random()).nextInt();
-    protected final int l = 1013904223;
-    protected float m;
-    protected float n;
-    protected float o;
-    protected float p;
     public int q;
     public EnumDifficulty difficulty;
     public Random random = new Random();
     public WorldProvider worldProvider; // CraftBukkit - remove final
-    protected List u = new ArrayList();
     public IChunkProvider chunkProvider; // CraftBukkit - public
-    protected final IDataManager dataManager;
     public WorldData worldData; // CraftBukkit - public
     public boolean isLoading;
     public PersistentCollection worldMaps;
-    public final PersistentVillage villages;
-    protected final VillageSiege siegeManager = new VillageSiege(this);
-    public final MethodProfiler methodProfiler;
-    private final Calendar J = Calendar.getInstance();
     public Scoreboard scoreboard = new Scoreboard(); // CraftBukkit - protected -> public
     public boolean isStatic;
-    // CraftBukkit start - public, longhashset
-    protected LongHashSet chunkTickList = new LongHashSet();
-    private int K;
     public boolean allowMonsters;
     public boolean allowAnimals;
     // Added the following
     public boolean captureBlockStates = false;
     public boolean captureTreeGeneration = false;
-    public ArrayList<BlockState> capturedBlockStates= new ArrayList<BlockState>();
+    public ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>();
     public long ticksPerAnimalSpawns;
     public long ticksPerMonsterSpawns;
     public boolean populating;
+    public boolean pvpMode;
+    public boolean keepSpawnInMemory = true;
+    public ChunkGenerator generator;
+    protected List f = new ArrayList();
+    protected int k = (new Random()).nextInt();
+    protected float m;
+    protected float n;
+    protected float o;
+    protected float p;
+    protected List u = new ArrayList();
+    // CraftBukkit start - public, longhashset
+    protected LongHashSet chunkTickList = new LongHashSet();
+    int[] I;
+    private List a = new ArrayList();
+    private List b = new ArrayList();
+    private long c = 16777215L;
+    private int K;
     private int tickPosition;
     // CraftBukkit end
     private ArrayList L;
     private boolean M;
-    int[] I;
-
-    public BiomeBase getBiome(int i, int j) {
-        if (this.isLoaded(i, 0, j)) {
-            Chunk chunk = this.getChunkAtWorldCoords(i, j);
-
-            try {
-                return chunk.a(i & 15, j & 15, this.worldProvider.e);
-            } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.a(throwable, "Getting biome");
-                CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Coordinates of biome request");
-
-                crashreportsystemdetails.a("Location", (Callable) (new CrashReportWorldLocation(this, i, j)));
-                throw new ReportedException(crashreport);
-            }
-        } else {
-            return this.worldProvider.e.getBiome(i, j);
-        }
-    }
-
-    public WorldChunkManager getWorldChunkManager() {
-        return this.worldProvider.e;
-    }
-
-    // CraftBukkit start
-    private final CraftWorld world;
-    public boolean pvpMode;
-    public boolean keepSpawnInMemory = true;
-    public ChunkGenerator generator;
-
-    public CraftWorld getWorld() {
-        return this.world;
-    }
-
-    public CraftServer getServer() {
-        return (CraftServer) Bukkit.getServer();
-    }
 
     // Changed signature - added gen and env
     public World(IDataManager idatamanager, String s, WorldSettings worldsettings, WorldProvider worldprovider, MethodProfiler methodprofiler, ChunkGenerator gen, org.bukkit.World.Environment env) {
@@ -180,6 +142,43 @@ public abstract class World implements IBlockAccess {
         this.a();
 
         this.getServer().addWorld(this.world); // CraftBukkit
+    }
+
+    public static boolean a(IBlockAccess iblockaccess, int i, int j, int k) {
+        Block block = iblockaccess.getType(i, j, k);
+        int l = iblockaccess.getData(i, j, k);
+
+        return block.getMaterial().k() && block.d() ? true : (block instanceof BlockStairs ? (l & 4) == 4 : (block instanceof BlockStepAbstract ? (l & 8) == 8 : (block instanceof BlockHopper ? true : (block instanceof BlockSnow ? (l & 7) == 7 : false))));
+    }
+
+    public BiomeBase getBiome(int i, int j) {
+        if (this.isLoaded(i, 0, j)) {
+            Chunk chunk = this.getChunkAtWorldCoords(i, j);
+
+            try {
+                return chunk.a(i & 15, j & 15, this.worldProvider.e);
+            } catch (Throwable throwable) {
+                CrashReport crashreport = CrashReport.a(throwable, "Getting biome");
+                CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Coordinates of biome request");
+
+                crashreportsystemdetails.a("Location", (Callable) (new CrashReportWorldLocation(this, i, j)));
+                throw new ReportedException(crashreport);
+            }
+        } else {
+            return this.worldProvider.e.getBiome(i, j);
+        }
+    }
+
+    public WorldChunkManager getWorldChunkManager() {
+        return this.worldProvider.e;
+    }
+
+    public CraftWorld getWorld() {
+        return this.world;
+    }
+
+    public CraftServer getServer() {
+        return (CraftServer) Bukkit.getServer();
     }
 
     protected abstract IChunkProvider j();
@@ -275,49 +274,49 @@ public abstract class World implements IBlockAccess {
         return this.chunkProvider.getOrCreateChunk(i, j);
     }
 
-    public boolean setTypeAndData(int i, int j, int k, Block block, int l, int i1) {
+    public boolean setTypeAndData(int x, int y, int z, Block block, int type, int data) {
         // CraftBukkit start - tree generation
         if (this.captureTreeGeneration) {
             BlockState blockstate = null;
             Iterator<BlockState> it = capturedBlockStates.iterator();
             while (it.hasNext()) {
                 BlockState previous = it.next();
-                if (previous.getX() == i && previous.getY() == j && previous.getZ() == k) {
+                if (previous.getX() == x && previous.getY() == y && previous.getZ() == z) {
                     blockstate = previous;
                     it.remove();
                     break;
                 }
             }
             if (blockstate == null) {
-                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, i, j, k, i1);
+                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, x, y, z, data);
             }
             blockstate.setTypeId(CraftMagicNumbers.getId(block));
-            blockstate.setRawData((byte) l);
+            blockstate.setRawData((byte) type);
             this.capturedBlockStates.add(blockstate);
             return true;
         }
-        if (i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000) {
-            if (j < 0) {
+        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+            if (y < 0) {
                 return false;
-            } else if (j >= 256) {
+            } else if (y >= 256) {
                 return false;
             } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
+                Chunk chunk = this.getChunkAt(x >> 4, z >> 4);
                 Block block1 = null;
 
-                if ((i1 & 1) != 0) {
-                    block1 = chunk.getType(i & 15, j, k & 15);
+                if ((data & 1) != 0) {
+                    block1 = chunk.getType(x & 15, y, z & 15);
                 }
 
                 // CraftBukkit start - capture blockstates
                 BlockState blockstate = null;
                 if (this.captureBlockStates) {
-                    blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, i, j, k, i1);
+                    blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, x, y, z, data);
                     this.capturedBlockStates.add(blockstate);
                 }
                 // CraftBukkit end
 
-                boolean flag = chunk.a(i & 15, j, k & 15, block, l);
+                boolean flag = chunk.a(x & 15, y, z & 15, block, type);
 
                 // CraftBukkit start - remove blockstate if failed
                 if (!flag && this.captureBlockStates) {
@@ -326,13 +325,13 @@ public abstract class World implements IBlockAccess {
                 // CraftBukkit end
 
                 this.methodProfiler.a("checkLight");
-                this.t(i, j, k);
+                this.t(x, y, z);
                 this.methodProfiler.b();
                 // CraftBukkit start
                 if (flag && !this.captureBlockStates) { // Don't notify clients or update physics while capturing blockstates
                     // Modularize client and physic updates
-                    this.notifyAndUpdatePhysics(i, j, k, chunk, block1, block, i1);
-                // CraftBukkit end
+                    this.notifyAndUpdatePhysics(x, y, z, chunk, block1, block, data);
+                    // CraftBukkit end
                 }
 
                 return flag;
@@ -341,10 +340,10 @@ public abstract class World implements IBlockAccess {
             return false;
         }
     }
+    // CraftBukkit end
 
     // CraftBukkit start - Split off from original setTypeAndData(int i, int j, int k, Block block, int l, int i1) method in order to directly send client and physic updates
-    public void notifyAndUpdatePhysics(int i, int j, int k, Chunk chunk, Block oldBlock, Block newBlock, int flag)
-    {
+    public void notifyAndUpdatePhysics(int i, int j, int k, Chunk chunk, Block oldBlock, Block newBlock, int flag) {
         // should be isReady()
         if ((flag & 2) != 0 && (chunk == null || chunk.k())) { // allow chunk to be null here as chunk.k() is false when we send our notification during block placement
             this.notify(i, j, k);
@@ -357,7 +356,6 @@ public abstract class World implements IBlockAccess {
             }
         }
     }
-    // CraftBukkit end
 
     public int getData(int i, int j, int k) {
         // CraftBukkit start - tree generation
@@ -920,7 +918,8 @@ public abstract class World implements IBlockAccess {
         }
     }
 
-    public void a(double d0, double d1, double d2, String s, float f, float f1, boolean flag) {}
+    public void a(double d0, double d1, double d2, String s, float f, float f1, boolean flag) {
+    }
 
     public void a(String s, int i, int j, int k) {
         for (int l = 0; l < this.u.size(); ++l) {
@@ -963,7 +962,7 @@ public abstract class World implements IBlockAccess {
             boolean isMonster = entity instanceof EntityMonster || entity instanceof EntityGhast || entity instanceof EntitySlime;
 
             if (spawnReason != SpawnReason.CUSTOM) {
-                if (isAnimal && !allowAnimals || isMonster && !allowMonsters)  {
+                if (isAnimal && !allowAnimals || isMonster && !allowMonsters) {
                     entity.dead = true;
                     return false;
                 }
@@ -1194,11 +1193,14 @@ public abstract class World implements IBlockAccess {
         return -1;
     }
 
-    public void a(int i, int j, int k, Block block, int l) {}
+    public void a(int i, int j, int k, Block block, int l) {
+    }
 
-    public void a(int i, int j, int k, Block block, int l, int i1) {}
+    public void a(int i, int j, int k, Block block, int l, int i1) {
+    }
 
-    public void b(int i, int j, int k, Block block, int l, int i1) {}
+    public void b(int i, int j, int k, Block block, int l, int i1) {
+    }
 
     public void tickEntities() {
         this.methodProfiler.a("entities");
@@ -1861,13 +1863,6 @@ public abstract class World implements IBlockAccess {
         return axisalignedbb != null && axisalignedbb.a() >= 1.0D;
     }
 
-    public static boolean a(IBlockAccess iblockaccess, int i, int j, int k) {
-        Block block = iblockaccess.getType(i, j, k);
-        int l = iblockaccess.getData(i, j, k);
-
-        return block.getMaterial().k() && block.d() ? true : (block instanceof BlockStairs ? (l & 4) == 4 : (block instanceof BlockStepAbstract ? (l & 8) == 8 : (block instanceof BlockHopper ? true : (block instanceof BlockSnow ? (l & 7) == 7 : false))));
-    }
-
     public boolean c(int i, int j, int k, boolean flag) {
         if (i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000) {
             Chunk chunk = this.chunkProvider.getOrCreateChunk(i >> 4, k >> 4);
@@ -2388,7 +2383,7 @@ public abstract class World implements IBlockAccess {
             }
 
             if (oclass.isAssignableFrom(entity.getClass())) {
-            // if ((!(entity instanceof EntityInsentient) || !((EntityInsentient) entity).isPersistent()) && oclass.isAssignableFrom(entity.getClass())) {
+                // if ((!(entity instanceof EntityInsentient) || !((EntityInsentient) entity).isPersistent()) && oclass.isAssignableFrom(entity.getClass())) {
                 // CraftBukkit end
                 ++i;
             }
@@ -2662,7 +2657,8 @@ public abstract class World implements IBlockAccess {
         return true;
     }
 
-    public void broadcastEntityEffect(Entity entity, byte b0) {}
+    public void broadcastEntityEffect(Entity entity, byte b0) {
+    }
 
     public IChunkProvider L() {
         return this.chunkProvider;
@@ -2684,7 +2680,8 @@ public abstract class World implements IBlockAccess {
         return this.worldData.getGameRules();
     }
 
-    public void everyoneSleeping() {}
+    public void everyoneSleeping() {
+    }
 
     // CraftBukkit start
     // Calls the method that checks to see if players are sleeping
@@ -2816,7 +2813,7 @@ public abstract class World implements IBlockAccess {
 
     public Calendar V() {
         if (this.getTime() % 600L == 0L) {
-            this.J.setTimeInMillis(MinecraftServer.ar());
+            this.J.setTimeInMillis(MinecraftServer.now());
         }
 
         return this.J;

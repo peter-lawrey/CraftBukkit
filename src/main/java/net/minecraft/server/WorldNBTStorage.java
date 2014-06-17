@@ -1,21 +1,13 @@
 package net.minecraft.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 
-// CraftBukkit start
+import java.io.*;
 import java.util.UUID;
 
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+// CraftBukkit start
 // CraftBukkit end
 
 public class WorldNBTStorage implements IDataManager, IPlayerFileData {
@@ -24,7 +16,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
     private final File baseDir;
     private final File playerDir;
     private final File dataDir;
-    private final long sessionId = MinecraftServer.ar();
+    private final long sessionId = MinecraftServer.now();
     private final String f;
     private UUID uuid = null; // CraftBukkit
 
@@ -252,7 +244,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
         return astring;
     }
 
-    public void a() {}
+    public void a() {
+    }
 
     public File getDataFile(String s) {
         return new File(this.dataDir, s + ".dat");

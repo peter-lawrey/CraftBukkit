@@ -16,13 +16,13 @@
 
 package org.bukkit.craftbukkit.util;
 
-import java.util.Iterator;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LongHashSet {
-    private final static int INITIAL_SIZE = 3;
-    private final static double LOAD_FACTOR = 0.75;
+    private final static int INITIAL_SIZE = 7;
+    private final static double LOAD_FACTOR = 0.5;
 
     private final static long FREE = 0;
     private final static long REMOVED = Long.MIN_VALUE;
@@ -37,7 +37,7 @@ public class LongHashSet {
     }
 
     public LongHashSet(int size) {
-        values = new long[(size==0 ? 1 : size)];
+        values = new long[(size == 0 ? 1 : size)];
         elements = 0;
         freeEntries = values.length;
         modCount = 0;
@@ -65,7 +65,7 @@ public class LongHashSet {
         int offset = 1;
 
         // search for the object (continue while !null and !this object)
-        while(values[index] != FREE && !(hash(values[index]) == hash && values[index] == value)) {
+        while (values[index] != FREE && !(values[index] == value)) {
             index = ((index + offset) & 0x7FFFFFFF) % values.length;
             offset = offset * 2 + 1;
 
@@ -88,7 +88,7 @@ public class LongHashSet {
         int deletedix = -1;
 
         // search for the object (continue while !null and !this object)
-        while(values[index] != FREE && !(hash(values[index]) == hash && values[index] == value)) {
+        while (values[index] != FREE && !(hash(values[index]) == hash && values[index] == value)) {
             // if there's a deleted object here we can put this object here,
             // provided it's not in here somewhere else already
             if (values[index] == REMOVED) {
@@ -134,7 +134,7 @@ public class LongHashSet {
         int offset = 1;
 
         // search for the object (continue while !null and !this object)
-        while(values[index] != FREE && !(hash(values[index]) == hash && values[index] == value)) {
+        while (values[index] != FREE && !(hash(values[index]) == hash && values[index] == value)) {
             index = ((index + offset) & 0x7FFFFFFF) % values.length;
             offset = offset * 2 + 1;
 

@@ -1,47 +1,41 @@
 package net.minecraft.server;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.TravelAgent;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.painting.PaintingBreakByEntityEvent;
+import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.plugin.PluginManager;
+
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
 // CraftBukkit start
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.TravelAgent;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Hanging;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Painting;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
-import org.bukkit.event.hanging.HangingBreakByEntityEvent;
-import org.bukkit.event.painting.PaintingBreakByEntityEvent;
-import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityPortalEvent;
-import org.bukkit.plugin.PluginManager;
 // CraftBukkit end
 
 public abstract class Entity {
 
     // CraftBukkit start
     private static final int CURRENT_LEVEL = 2;
-    static boolean isLevelAtLeast(NBTTagCompound tag, int level) {
-        return tag.hasKey("Bukkit.updateLevel") && tag.getInt("Bukkit.updateLevel") >= level;
-    }
-    // CraftBukkit end
-
     private static int entityCount;
-    private int id;
+    // CraftBukkit end
+    public final AxisAlignedBB boundingBox;
+    protected final Random random = new Random();
     public double j;
     public boolean k;
     public Entity passenger;
@@ -61,13 +55,11 @@ public abstract class Entity {
     public float pitch;
     public float lastYaw;
     public float lastPitch;
-    public final AxisAlignedBB boundingBox;
     public boolean onGround;
     public boolean positionChanged;
     public boolean F;
     public boolean G;
     public boolean velocityChanged;
-    protected boolean I;
     public boolean J;
     public boolean dead;
     public float height;
@@ -77,7 +69,6 @@ public abstract class Entity {
     public float P;
     public float Q;
     public float fallDistance;
-    private int d;
     public double S;
     public double T;
     public double U;
@@ -86,17 +77,10 @@ public abstract class Entity {
     public boolean X;
     public float Y;
     public float Z;
-    protected Random random;
     public int ticksLived;
     public int maxFireTicks;
     public int fireTicks; // CraftBukkit - private -> public
-    protected boolean inWater;
     public int noDamageTicks;
-    private boolean justCreated;
-    protected boolean fireProof;
-    protected DataWatcher datawatcher;
-    private double g;
-    private double h;
     public boolean ag;
     public int ah;
     public int ai;
@@ -104,23 +88,25 @@ public abstract class Entity {
     public boolean ak;
     public boolean al;
     public int portalCooldown;
-    protected boolean an;
-    protected int ao;
     public int dimension;
-    protected int aq;
-    private boolean invulnerable;
     public UUID uniqueID; // CraftBukkit - protected -> public
     public EnumEntitySize as;
     public boolean valid; // CraftBukkit
     public org.bukkit.projectiles.ProjectileSource projectileSource; // CraftBukkit - For projectiles only
-
-    public int getId() {
-        return this.id;
-    }
-
-    public void d(int i) {
-        this.id = i;
-    }
+    protected boolean I;
+    protected boolean inWater;
+    protected boolean fireProof;
+    protected DataWatcher datawatcher;
+    protected boolean an;
+    protected int ao;
+    protected int aq;
+    protected CraftEntity bukkitEntity;
+    private int id;
+    private int d;
+    private boolean justCreated;
+    private double g;
+    private double h;
+    private boolean invulnerable;
 
     public Entity(World world) {
         this.id = entityCount++;
@@ -130,10 +116,10 @@ public abstract class Entity {
         this.width = 0.6F;
         this.length = 1.8F;
         this.d = 1;
-        this.random = new Random();
+//        this.random = new Random();
         this.maxFireTicks = 1;
         this.justCreated = true;
-        this.uniqueID = UUID.randomUUID();
+        this.uniqueID = new UUID(random.nextLong(), id);
         this.as = EnumEntitySize.SIZE_2;
         this.world = world;
         this.setPosition(0.0D, 0.0D, 0.0D);
@@ -145,6 +131,18 @@ public abstract class Entity {
         this.datawatcher.a(0, Byte.valueOf((byte) 0));
         this.datawatcher.a(1, Short.valueOf((short) 300));
         this.c();
+    }
+
+    static boolean isLevelAtLeast(NBTTagCompound tag, int level) {
+        return tag.hasKey("Bukkit.updateLevel") && tag.getInt("Bukkit.updateLevel") >= level;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void d(int i) {
+        this.id = i;
     }
 
     protected abstract void c();
@@ -1004,7 +1002,8 @@ public abstract class Entity {
         return d0 * d0 + d1 * d1 + d2 * d2;
     }
 
-    public void b_(EntityHuman entityhuman) {}
+    public void b_(EntityHuman entityhuman) {
+    }
 
     public void collide(Entity entity) {
         if (entity.passenger != this && entity.vehicle != this) {
@@ -1062,7 +1061,8 @@ public abstract class Entity {
         return false;
     }
 
-    public void b(Entity entity, int i) {}
+    public void b(Entity entity, int i) {
+    }
 
     public boolean c(NBTTagCompound nbttagcompound) {
         String s = this.V();
@@ -1090,8 +1090,8 @@ public abstract class Entity {
 
     public void e(NBTTagCompound nbttagcompound) {
         try {
-            nbttagcompound.set("Pos", this.a(new double[] { this.locX, this.locY + (double) this.V, this.locZ}));
-            nbttagcompound.set("Motion", this.a(new double[] { this.motX, this.motY, this.motZ}));
+            nbttagcompound.set("Pos", this.a(new double[]{this.locX, this.locY + (double) this.V, this.locZ}));
+            nbttagcompound.set("Motion", this.a(new double[]{this.motX, this.motY, this.motZ}));
 
             // CraftBukkit start - Checking for NaN pitch/yaw and resetting to zero
             // TODO: make sure this is the best way to address this.
@@ -1104,7 +1104,7 @@ public abstract class Entity {
             }
             // CraftBukkit end
 
-            nbttagcompound.set("Rotation", this.a(new float[] { this.yaw, this.pitch}));
+            nbttagcompound.set("Rotation", this.a(new float[]{this.yaw, this.pitch}));
             nbttagcompound.setFloat("FallDistance", this.fallDistance);
             nbttagcompound.setShort("Fire", (short) this.fireTicks);
             nbttagcompound.setShort("Air", (short) this.getAirTicks());
@@ -1254,7 +1254,8 @@ public abstract class Entity {
 
     protected abstract void b(NBTTagCompound nbttagcompound);
 
-    public void W() {}
+    public void W() {
+    }
 
     protected NBTTagList a(double... adouble) {
         NBTTagList nbttaglist = new NBTTagList();
@@ -1413,8 +1414,6 @@ public abstract class Entity {
         this.setPassengerOf(entity);
     }
 
-    protected CraftEntity bukkitEntity;
-
     public CraftEntity getBukkitEntity() {
         if (this.bukkitEntity == null) {
             this.bukkitEntity = CraftEntity.getEntity(this.world.getServer(), this);
@@ -1529,7 +1528,8 @@ public abstract class Entity {
         return null;
     }
 
-    public void setEquipment(int i, ItemStack itemstack) {}
+    public void setEquipment(int i, ItemStack itemstack) {
+    }
 
     public boolean isBurning() {
         boolean flag = this.world != null && this.world.isStatic;
@@ -1637,7 +1637,8 @@ public abstract class Entity {
         }
     }
 
-    public void a(EntityLiving entityliving) {}
+    public void a(EntityLiving entityliving) {
+    }
 
     protected boolean j(double d0, double d1, double d2) {
         int i = MathHelper.floor(d0);
@@ -1751,7 +1752,7 @@ public abstract class Entity {
     }
 
     public String toString() {
-        return String.format("%s[\'%s\'/%d, l=\'%s\', x=%.2f, y=%.2f, z=%.2f]", new Object[] { this.getClass().getSimpleName(), this.getName(), Integer.valueOf(this.id), this.world == null ? "~NULL~" : this.world.getWorldData().getName(), Double.valueOf(this.locX), Double.valueOf(this.locY), Double.valueOf(this.locZ)});
+        return String.format("%s[\'%s\'/%d, l=\'%s\', x=%.2f, y=%.2f, z=%.2f]", new Object[]{this.getClass().getSimpleName(), this.getName(), Integer.valueOf(this.id), this.world == null ? "~NULL~" : this.world.getWorldData().getName(), Double.valueOf(this.locX), Double.valueOf(this.locY), Double.valueOf(this.locZ)});
     }
 
     public boolean isInvulnerable() {
@@ -1880,9 +1881,9 @@ public abstract class Entity {
         crashreportsystemdetails.a("Entity Type", (Callable) (new CrashReportEntityType(this)));
         crashreportsystemdetails.a("Entity ID", Integer.valueOf(this.id));
         crashreportsystemdetails.a("Entity Name", (Callable) (new CrashReportEntityName(this)));
-        crashreportsystemdetails.a("Entity\'s Exact location", String.format("%.2f, %.2f, %.2f", new Object[] { Double.valueOf(this.locX), Double.valueOf(this.locY), Double.valueOf(this.locZ)}));
+        crashreportsystemdetails.a("Entity\'s Exact location", String.format("%.2f, %.2f, %.2f", new Object[]{Double.valueOf(this.locX), Double.valueOf(this.locY), Double.valueOf(this.locZ)}));
         crashreportsystemdetails.a("Entity\'s Block location", CrashReportSystemDetails.a(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ)));
-        crashreportsystemdetails.a("Entity\'s Momentum", String.format("%.2f, %.2f, %.2f", new Object[] { Double.valueOf(this.motX), Double.valueOf(this.motY), Double.valueOf(this.motZ)}));
+        crashreportsystemdetails.a("Entity\'s Momentum", String.format("%.2f, %.2f, %.2f", new Object[]{Double.valueOf(this.motX), Double.valueOf(this.motY), Double.valueOf(this.motZ)}));
     }
 
     public UUID getUniqueID() {
@@ -1897,5 +1898,6 @@ public abstract class Entity {
         return new ChatComponentText(this.getName());
     }
 
-    public void i(int i) {}
+    public void i(int i) {
+    }
 }

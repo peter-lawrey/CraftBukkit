@@ -1,26 +1,9 @@
 package org.bukkit.craftbukkit;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-
 import net.minecraft.server.*;
-
 import org.apache.commons.lang.Validate;
-import org.bukkit.BlockChangeDelegate;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
 import org.bukkit.Chunk;
-import org.bukkit.ChunkSnapshot;
-import org.bukkit.Difficulty;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -28,17 +11,16 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.block.CraftBlockState;
-import org.bukkit.craftbukkit.entity.*;
+import org.bukkit.craftbukkit.entity.CraftItem;
+import org.bukkit.craftbukkit.entity.CraftLightningStrike;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.metadata.BlockMetadataStore;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
-import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.*;
 import org.bukkit.entity.minecart.PoweredMinecart;
-import org.bukkit.entity.minecart.SpawnerMinecart;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.weather.ThunderChangeEvent;
@@ -52,23 +34,24 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.util.Vector;
 
+import java.io.File;
+import java.util.*;
+
 public class CraftWorld implements World {
     public static final int CUSTOM_DIMENSION_OFFSET = 10;
-
+    private static final Random rand = new Random();
     private final WorldServer world;
-    private Environment environment;
     private final CraftServer server = (CraftServer) Bukkit.getServer();
     private final ChunkGenerator generator;
     private final List<BlockPopulator> populators = new ArrayList<BlockPopulator>();
     private final BlockMetadataStore blockMetadata = new BlockMetadataStore(this);
+    private Environment environment;
     private int monsterSpawn = -1;
     private int animalSpawn = -1;
     private int waterAnimalSpawn = -1;
     private int ambientSpawn = -1;
     private int chunkLoadCount = 0;
     private int chunkGCTickCount;
-
-    private static final Random rand = new Random();
 
     public CraftWorld(WorldServer world, ChunkGenerator gen, Environment env) {
         this.world = world;
@@ -356,55 +339,55 @@ public class CraftWorld implements World {
     public boolean generateTree(Location loc, TreeType type) {
         net.minecraft.server.WorldGenerator gen;
         switch (type) {
-        case BIG_TREE:
-            gen = new WorldGenBigTree(true);
-            break;
-        case BIRCH:
-            gen = new WorldGenForest(true, false);
-            break;
-        case REDWOOD:
-            gen = new WorldGenTaiga2(true);
-            break;
-        case TALL_REDWOOD:
-            gen = new WorldGenTaiga1();
-            break;
-        case JUNGLE:
-            gen = new WorldGenJungleTree(true, 10, 20, 3, 3); // Magic values as in BlockSapling
-            break;
-        case SMALL_JUNGLE:
-            gen = new WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, false);
-            break;
-        case COCOA_TREE:
-            gen = new WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, true);
-            break;
-        case JUNGLE_BUSH:
-            gen = new WorldGenGroundBush(3, 0);
-            break;
-        case RED_MUSHROOM:
-            gen = new WorldGenHugeMushroom(1);
-            break;
-        case BROWN_MUSHROOM:
-            gen = new WorldGenHugeMushroom(0);
-            break;
-        case SWAMP:
-            gen = new WorldGenSwampTree();
-            break;
-        case ACACIA:
-            gen = new WorldGenAcaciaTree(true);
-            break;
-        case DARK_OAK:
-            gen = new WorldGenForestTree(true);
-            break;
-        case MEGA_REDWOOD:
-            gen = new WorldGenMegaTree(false, rand.nextBoolean());
-            break;
-        case TALL_BIRCH:
-            gen = new WorldGenForest(true, true);
-            break;
-        case TREE:
-        default:
-            gen = new WorldGenTrees(true);
-            break;
+            case BIG_TREE:
+                gen = new WorldGenBigTree(true);
+                break;
+            case BIRCH:
+                gen = new WorldGenForest(true, false);
+                break;
+            case REDWOOD:
+                gen = new WorldGenTaiga2(true);
+                break;
+            case TALL_REDWOOD:
+                gen = new WorldGenTaiga1();
+                break;
+            case JUNGLE:
+                gen = new WorldGenJungleTree(true, 10, 20, 3, 3); // Magic values as in BlockSapling
+                break;
+            case SMALL_JUNGLE:
+                gen = new WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, false);
+                break;
+            case COCOA_TREE:
+                gen = new WorldGenTrees(true, 4 + rand.nextInt(7), 3, 3, true);
+                break;
+            case JUNGLE_BUSH:
+                gen = new WorldGenGroundBush(3, 0);
+                break;
+            case RED_MUSHROOM:
+                gen = new WorldGenHugeMushroom(1);
+                break;
+            case BROWN_MUSHROOM:
+                gen = new WorldGenHugeMushroom(0);
+                break;
+            case SWAMP:
+                gen = new WorldGenSwampTree();
+                break;
+            case ACACIA:
+                gen = new WorldGenAcaciaTree(true);
+                break;
+            case DARK_OAK:
+                gen = new WorldGenForestTree(true);
+                break;
+            case MEGA_REDWOOD:
+                gen = new WorldGenMegaTree(false, rand.nextBoolean());
+                break;
+            case TALL_BIRCH:
+                gen = new WorldGenForest(true, true);
+                break;
+            case TREE:
+            default:
+                gen = new WorldGenTrees(true);
+                break;
         }
 
         return gen.a(world, rand, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -417,19 +400,20 @@ public class CraftWorld implements World {
         world.captureBlockStates = false;
         world.captureTreeGeneration = false;
         if (grownTree) { // Copy block data to delegate
-            for (BlockState blockstate : world.capturedBlockStates) {
+            ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>(world.capturedBlockStates);
+            world.capturedBlockStates.clear();
+            for (BlockState blockstate : capturedBlockStates) {
                 int x = blockstate.getX();
                 int y = blockstate.getY();
                 int z = blockstate.getZ();
                 net.minecraft.server.Block oldBlock = world.getType(x, y, z);
                 int typeId = blockstate.getTypeId();
                 int data = blockstate.getRawData();
-                int flag = ((CraftBlockState)blockstate).getFlag();
+                int flag = ((CraftBlockState) blockstate).getFlag();
                 delegate.setTypeIdAndData(x, y, z, typeId, data);
                 net.minecraft.server.Block newBlock = world.getType(x, y, z);
                 world.notifyAndUpdatePhysics(x, y, z, null, oldBlock, newBlock, flag);
             }
-            world.capturedBlockStates.clear();
             return true;
         } else {
             world.capturedBlockStates.clear();
@@ -561,7 +545,7 @@ public class CraftWorld implements World {
 
             if (chunk != null) {
                 byte[] biomevals = chunk.m();
-                biomevals[((z & 0xF) << 4) | (x & 0xF)] = (byte)bb.id;
+                biomevals[((z & 0xF) << 4) | (x & 0xF)] = (byte) bb.id;
             }
         }
     }
@@ -613,14 +597,14 @@ public class CraftWorld implements World {
     @SuppressWarnings("unchecked")
     @Deprecated
     public <T extends Entity> Collection<T> getEntitiesByClass(Class<T>... classes) {
-        return (Collection<T>)getEntitiesByClasses(classes);
+        return (Collection<T>) getEntitiesByClasses(classes);
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Entity> Collection<T> getEntitiesByClass(Class<T> clazz) {
         Collection<T> list = new ArrayList<T>();
 
-        for (Object entity: world.entityList) {
+        for (Object entity : world.entityList) {
             if (entity instanceof net.minecraft.server.Entity) {
                 Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
 
@@ -642,7 +626,7 @@ public class CraftWorld implements World {
     public Collection<Entity> getEntitiesByClasses(Class<?>... classes) {
         Collection<Entity> list = new ArrayList<Entity>();
 
-        for (Object entity: world.entityList) {
+        for (Object entity : world.entityList) {
             if (entity instanceof net.minecraft.server.Entity) {
                 Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
 
@@ -703,12 +687,12 @@ public class CraftWorld implements World {
         world.savingDisabled = !value;
     }
 
-    public void setDifficulty(Difficulty difficulty) {
-        this.getHandle().difficulty = EnumDifficulty.a(difficulty.getValue());
-    }
-
     public Difficulty getDifficulty() {
         return Difficulty.getByValue(this.getHandle().difficulty.ordinal());
+    }
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.getHandle().difficulty = EnumDifficulty.a(difficulty.getValue());
     }
 
     public BlockMetadataStore getBlockMetadata() {
@@ -1019,19 +1003,19 @@ public class CraftWorld implements World {
             }
             int dir;
             switch (face) {
-            case SOUTH:
-            default:
-                dir = 0;
-                break;
-            case WEST:
-                dir = 1;
-                break;
-            case NORTH:
-                dir = 2;
-                break;
-            case EAST:
-                dir = 3;
-                break;
+                case SOUTH:
+                default:
+                    dir = 0;
+                    break;
+                case WEST:
+                    dir = 1;
+                    break;
+                case NORTH:
+                    dir = 2;
+                    break;
+                case EAST:
+                    dir = 3;
+                    break;
             }
 
             if (Painting.class.isAssignableFrom(clazz)) {
