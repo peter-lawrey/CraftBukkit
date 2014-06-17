@@ -163,7 +163,7 @@ public abstract class BiomeBase {
                 return biomes[paramInt & 0x7F];
             aC.warn("Biome ID is out of bounds: " + paramInt + ", defaulting to 0 (Ocean)");
             return OCEAN;
-        }
+    }
         return biomes[paramInt];
     }
 
@@ -174,7 +174,7 @@ public abstract class BiomeBase {
     protected BiomeBase a(float paramFloat1, float paramFloat2) {
         if ((paramFloat1 > 0.1F) && (paramFloat1 < 0.2F)) {
             throw new IllegalArgumentException("Please avoid temperatures in the range 0.1 - 0.2 because of snow");
-        }
+    }
         this.temperature = paramFloat1;
         this.humidity = paramFloat2;
         return this;
@@ -194,7 +194,7 @@ public abstract class BiomeBase {
     public WorldGenTreeAbstract a(Random paramRandom) {
         if (paramRandom.nextInt(10) == 0) {
             return this.aA;
-        }
+    }
         return this.az;
     }
 
@@ -205,7 +205,7 @@ public abstract class BiomeBase {
     public String a(Random paramRandom, int paramInt1, int paramInt2, int paramInt3) {
         if (paramRandom.nextInt(3) > 0) {
             return BlockFlowers.b[0];
-        }
+    }
         return BlockFlowers.a[0];
     }
 
@@ -240,23 +240,23 @@ public abstract class BiomeBase {
             this.ah = ((paramInt & 0xFEFEFE) >> 1);
         } else {
             this.ah = paramInt;
-        }
+    }
         return this;
     }
 
     public List getMobs(EnumCreatureType paramEnumCreatureType) {
         if (paramEnumCreatureType == EnumCreatureType.MONSTER) {
             return this.as;
-        }
+    }
         if (paramEnumCreatureType == EnumCreatureType.CREATURE) {
             return this.at;
-        }
+    }
         if (paramEnumCreatureType == EnumCreatureType.WATER_CREATURE) {
             return this.au;
-        }
+    }
         if (paramEnumCreatureType == EnumCreatureType.AMBIENT) {
             return this.av;
-        }
+    }
         return null;
     }
 
@@ -267,7 +267,7 @@ public abstract class BiomeBase {
     public boolean e() {
         if (j()) {
             return false;
-        }
+    }
         return this.ax;
     }
 
@@ -287,7 +287,7 @@ public abstract class BiomeBase {
         if (paramInt2 > 64) {
             float f1 = (float) ac.a(paramInt1 * 1.0D / 8.0D, paramInt3 * 1.0D / 8.0D) * 4.0F;
             return this.temperature - (f1 + paramInt2 - 64.0F) * 0.05F / 30.0F;
-        }
+    }
         return this.temperature;
     }
 
@@ -328,7 +328,7 @@ public abstract class BiomeBase {
                             localBlock1 = null;
                             i2 = 0;
                             localBlock2 = Blocks.STONE;
-                        } else if ((i8 >= 59) && (i8 <= 64)) {
+            } else if ((i8 >= 59) && (i8 <= 64)) {
                             localBlock1 = this.ai;
                             i2 = (byte) (this.aj & 0xFF);
                             localBlock2 = this.ak;
@@ -361,9 +361,9 @@ public abstract class BiomeBase {
                             localBlock2 = Blocks.SANDSTONE;
                         }
                     }
-                }
-            }
         }
+            }
+    }
     }
 
     protected BiomeBase k() {
@@ -377,20 +377,20 @@ public abstract class BiomeBase {
     public boolean a(BiomeBase paramBiomeBase) {
         if (paramBiomeBase == this) {
             return true;
-        }
+    }
         if (paramBiomeBase == null) {
             return false;
-        }
+    }
         return l() == paramBiomeBase.l();
     }
 
     public EnumTemperature m() {
         if (this.temperature < 0.2D) {
             return EnumTemperature.COLD;
-        }
+    }
         if (this.temperature < 1.0D) {
             return EnumTemperature.MEDIUM;
-        }
+    }
         return EnumTemperature.WARM;
     }
 }

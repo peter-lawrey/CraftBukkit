@@ -111,7 +111,9 @@ public class WorldGenVillageHut
             int o = a(Blocks.LADDER, 4);
             for (int y = 10 - k; y <= 0; y++)
                 a(world, Blocks.LADDER, o, 2, y, 2, box);
+            o = a(Blocks.TORCH, 3);
             a(world, Blocks.TORCH, o, 0, 12 - k, 0, box);
+            o = a(Blocks.TORCH, 2);
             a(world, Blocks.TORCH, o, 2, 3, 2, box);
         }
         a(world, Blocks.LOG, 0, 2, 1, 2, box);
