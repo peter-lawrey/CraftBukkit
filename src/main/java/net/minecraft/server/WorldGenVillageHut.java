@@ -48,10 +48,10 @@ public class WorldGenVillageHut
             }
             this.f.a(0, this.k - this.f.e + 6 - 1, 0);
         }
-        a(world, box, -1, 1, -1, -1, 6, -1, Blocks.ICE, Blocks.ICE, false);
+        a(world, box, -1, 3, 0, -1, 5, 0, Blocks.FENCE, Blocks.FENCE, false);
+        a(world, Blocks.TORCH, 0, -1, 6, 0, box);
 
         a(world, box, 1, 1, 1, 3, 5, 4, Blocks.AIR, Blocks.AIR, false);
-
 
         a(world, box, 0, 0, 0, 3, 0, 4, Blocks.COBBLESTONE, Blocks.COBBLESTONE, false);
         a(world, box, 1, 0, 1, 2, 0, 3, Blocks.DIRT, Blocks.DIRT, false);

@@ -417,12 +417,20 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
             long j = now();
             i = 0;
+            int count = 0;
             for (int k = -192; k <= 192 && this.isRunning(); k += 16) {
                 for (int l = -192; l <= 192 && this.isRunning(); l += 16) {
+                    if (Math.abs(k) + Math.abs(l) > 300) continue;
+                    count++;
+                }
+            }
+            for (int k = -192; k <= 192 && this.isRunning(); k += 16) {
+                for (int l = -192; l <= 192 && this.isRunning(); l += 16) {
+                    if (Math.abs(k) + Math.abs(l) > 300) continue;
                     long i1 = now();
 
                     if (i1 - j > 1000L) {
-                        this.a_("Preparing spawn area", i * 100 / 625);
+                        this.a_("Preparing spawn area", i * 1000 / count / 10.0);
                         j = i1;
                     }
 
@@ -454,6 +462,13 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     protected void a_(String s, int i) {
         this.e = s;
         this.f = i;
+        // CraftBukkit - Use FQN to work around decompiler issue
+        MinecraftServer.i.info(s + ": " + i + "%");
+    }
+
+    protected void a_(String s, double i) {
+        this.e = s;
+        this.f = (int) i;
         // CraftBukkit - Use FQN to work around decompiler issue
         MinecraftServer.i.info(s + ": " + i + "%");
     }
