@@ -48,10 +48,10 @@ public class WorldGenVillageHut
             }
             this.f.a(0, this.k - this.f.e + 6 - 1, 0);
         }
-        a(world, box, -1, 3, 0, -1, 5, 0, Blocks.FENCE, Blocks.FENCE, false);
-        a(world, Blocks.TORCH, 0, -1, 6, 0, box);
+        a(world, box, -1, 1, -1, -1, 6, -1, Blocks.ICE, Blocks.ICE, false);
 
         a(world, box, 1, 1, 1, 3, 5, 4, Blocks.AIR, Blocks.AIR, false);
+
 
         a(world, box, 0, 0, 0, 3, 0, 4, Blocks.COBBLESTONE, Blocks.COBBLESTONE, false);
         a(world, box, 1, 0, 1, 2, 0, 3, Blocks.DIRT, Blocks.DIRT, false);
@@ -111,9 +111,7 @@ public class WorldGenVillageHut
             int o = a(Blocks.LADDER, 4);
             for (int y = 10 - k; y <= 0; y++)
                 a(world, Blocks.LADDER, o, 2, y, 2, box);
-            o = a(Blocks.TORCH, 3);
             a(world, Blocks.TORCH, o, 0, 12 - k, 0, box);
-            o = a(Blocks.TORCH, 2);
             a(world, Blocks.TORCH, o, 2, 3, 2, box);
         }
         a(world, Blocks.LOG, 0, 2, 1, 2, box);

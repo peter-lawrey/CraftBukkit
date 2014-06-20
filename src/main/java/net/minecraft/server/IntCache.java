@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IntCache {
-    private static final int CS = 1024;
+    private static final int CS = 8 * 1024;
+    private static final int ES = 1024;
     private static int a = 256;
     private static List<int[]> b = new ArrayList();
     private static List<int[]> c = new ArrayList();
@@ -32,18 +33,18 @@ public class IntCache {
             e.clear();
 
             arrayOfInt = new int[a];
-            if (e.size() < CS)
+            if (e.size() < ES)
                 e.add(arrayOfInt);
             return arrayOfInt;
         }
         if (d.isEmpty()) {
             arrayOfInt = new int[a];
-            if (e.size() < CS)
+            if (e.size() < ES)
                 e.add(arrayOfInt);
             return arrayOfInt;
         }
         arrayOfInt = (int[]) d.remove(d.size() - 1);
-        if (e.size() < CS)
+        if (e.size() < ES)
             e.add(arrayOfInt);
         return arrayOfInt;
     }

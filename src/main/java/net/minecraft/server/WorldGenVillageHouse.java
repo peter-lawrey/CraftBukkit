@@ -44,75 +44,53 @@ public class WorldGenVillageHouse
             }
             this.f.a(0, this.k - this.f.e + 6 - 1, 0);
         }
-        a(world, box, 0, 0, 0, 4, 0, 4, Blocks.COBBLESTONE, Blocks.COBBLESTONE, false);
+        a(world, Blocks.GLOWSTONE, 0, 0, 10, 0, box);
+        // floor
+        a(world, box, 0, 0, 0, 4, 4, 4, Blocks.WOOD, Blocks.COBBLESTONE, false);
 
-        a(world, box, 0, 4, 0, 4, 4, 4, Blocks.LOG, Blocks.LOG, false);
-        a(world, box, 1, 4, 1, 3, 4, 3, Blocks.WOOD, Blocks.WOOD, false);
+        // roof outer
+        a(world, box, 0, 4, 0, 4, 4, 4, Blocks.WOOD, Blocks.LOG, false);
 
-
-        a(world, Blocks.COBBLESTONE, 0, 0, 1, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 0, 2, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 0, 3, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 1, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 2, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 3, 0, box);
-        a(world, Blocks.COBBLESTONE, 0, 0, 1, 4, box);
-        a(world, Blocks.COBBLESTONE, 0, 0, 2, 4, box);
-        a(world, Blocks.COBBLESTONE, 0, 0, 3, 4, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 1, 4, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 2, 4, box);
-        a(world, Blocks.COBBLESTONE, 0, 4, 3, 4, box);
-        a(world, box, 0, 1, 1, 0, 3, 3, Blocks.WOOD, Blocks.WOOD, false);
-        a(world, box, 4, 1, 1, 4, 3, 3, Blocks.WOOD, Blocks.WOOD, false);
-        a(world, box, 1, 1, 4, 3, 3, 4, Blocks.WOOD, Blocks.WOOD, false);
+        // three walls
         a(world, Blocks.THIN_GLASS, 0, 0, 2, 2, box);
         a(world, Blocks.THIN_GLASS, 0, 2, 2, 4, box);
         a(world, Blocks.THIN_GLASS, 0, 4, 2, 2, box);
 
+        // around the door.
+        a(world, Blocks.AIR, 0, 2, 1, 0, box);
+        a(world, Blocks.AIR, 0, 2, 2, 0, box);
 
-        a(world, Blocks.WOOD, 0, 1, 1, 0, box);
-        a(world, Blocks.WOOD, 0, 1, 2, 0, box);
-        a(world, Blocks.WOOD, 0, 1, 3, 0, box);
-        a(world, Blocks.WOOD, 0, 2, 3, 0, box);
-        a(world, Blocks.WOOD, 0, 3, 3, 0, box);
-        a(world, Blocks.WOOD, 0, 3, 2, 0, box);
-        a(world, Blocks.WOOD, 0, 3, 1, 0, box);
-        if ((a(world, 2, 0, -1, box).getMaterial() == Material.AIR) && (a(world, 2, -1, -1, box).getMaterial() != Material.AIR)) {
-            a(world, Blocks.COBBLESTONE_STAIRS, a(Blocks.COBBLESTONE_STAIRS, 3), 2, 0, -1, box);
+        // add stairs the the front.
+        for (int s = 0; s < k - 10; s++) {
+            if (a(world, 2, 0 - s, -1 - s, box).getMaterial() != Material.AIR) {
+                break;
+            }
+            a(world, Blocks.COBBLESTONE_STAIRS, a(Blocks.COBBLESTONE_STAIRS, 3), 2, 0 - s, -1 - s, box);
         }
         a(world, box, 1, 1, 1, 3, 3, 3, Blocks.AIR, Blocks.AIR, false);
+        // fence around the top.
+        a = true;
         if (this.a) {
-            a(world, Blocks.FENCE, 0, 0, 5, 0, box);
-            a(world, Blocks.FENCE, 0, 1, 5, 0, box);
-            a(world, Blocks.FENCE, 0, 2, 5, 0, box);
-            a(world, Blocks.FENCE, 0, 3, 5, 0, box);
-            a(world, Blocks.FENCE, 0, 4, 5, 0, box);
-            a(world, Blocks.FENCE, 0, 0, 5, 4, box);
-            a(world, Blocks.FENCE, 0, 1, 5, 4, box);
-            a(world, Blocks.FENCE, 0, 2, 5, 4, box);
-            a(world, Blocks.FENCE, 0, 3, 5, 4, box);
-            a(world, Blocks.FENCE, 0, 4, 5, 4, box);
-            a(world, Blocks.FENCE, 0, 4, 5, 1, box);
-            a(world, Blocks.FENCE, 0, 4, 5, 2, box);
-            a(world, Blocks.FENCE, 0, 4, 5, 3, box);
-            a(world, Blocks.FENCE, 0, 0, 5, 1, box);
-            a(world, Blocks.FENCE, 0, 0, 5, 2, box);
-            a(world, Blocks.FENCE, 0, 0, 5, 3, box);
+            for (int x = 0; x <= 4; x++)
+                for (int z = 0; z <= 4; z++)
+                    if (x == 0 || z == 0 || x == 4 || z == 4)
+                        a(world, Blocks.FENCE, 0, x, 5, z, box);
         }
         if (this.a) {
             int i = a(Blocks.LADDER, 3);
-            a(world, Blocks.LADDER, i, 3, 1, 3, box);
-            a(world, Blocks.LADDER, i, 3, 2, 3, box);
-            a(world, Blocks.LADDER, i, 3, 3, 3, box);
-            a(world, Blocks.LADDER, i, 3, 4, 3, box);
+            for (int j = 1; j <= 4; j++)
+                a(world, Blocks.LADDER, i, 3, j, 3, box);
         }
         a(world, Blocks.TORCH, 0, 2, 3, 1, box);
+        a(world, Blocks.TORCH, 0, 1, 3, -1, box);
+        a(world, Blocks.TORCH, 0, 3, 3, -1, box);
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
                 b(world, j, 6, i, box);
                 b(world, Blocks.COBBLESTONE, 0, j, -1, i, box);
             }
         }
+        addStairs(world, box);
         a(world, box, 1, 1, 2, 1);
 
         return true;

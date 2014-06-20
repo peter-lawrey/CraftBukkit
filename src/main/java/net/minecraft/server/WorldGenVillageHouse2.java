@@ -31,6 +31,7 @@ public class WorldGenVillageHouse2
             }
             this.f.a(0, this.k - this.f.e + 7 - 1, 0);
         }
+        a(paramWorld, Blocks.EMERALD_BLOCK, 0, 0, 10, 0, paramStructureBoundingBox);
         a(paramWorld, paramStructureBoundingBox, 1, 1, 1, 7, 4, 4, Blocks.AIR, Blocks.AIR, false);
         a(paramWorld, paramStructureBoundingBox, 2, 1, 6, 8, 4, 10, Blocks.AIR, Blocks.AIR, false);
 

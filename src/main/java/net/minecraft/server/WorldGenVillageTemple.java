@@ -110,15 +110,15 @@ public class WorldGenVillageTemple
         a(world, Blocks.AIR, 0, 2, 1, 0, box);
         a(world, Blocks.AIR, 0, 2, 2, 0, box);
         a(world, box, rand, 2, 1, 0, a(Blocks.WOODEN_DOOR, 1));
-        if ((a(world, 2, 0, -1, box).getMaterial() == Material.AIR) && (a(world, 2, -1, -1, box).getMaterial() != Material.AIR)) {
-            a(world, Blocks.COBBLESTONE_STAIRS, a(Blocks.COBBLESTONE_STAIRS, 3), 2, 0, -1, box);
-        }
+
         for (int j = 0; j < 9; j++) {
             for (int k = 0; k < 5; k++) {
                 b(world, k, 12, j, box);
                 b(world, Blocks.COBBLESTONE, 0, k, -1, j, box);
             }
         }
+        addStairs(world, box);
+
         a(world, box, 2, 1, 2, 1);
 
         return true;

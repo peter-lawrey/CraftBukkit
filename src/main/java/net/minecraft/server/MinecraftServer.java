@@ -417,20 +417,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
             long j = now();
             i = 0;
-            int count = 0;
             for (int k = -192; k <= 192 && this.isRunning(); k += 16) {
                 for (int l = -192; l <= 192 && this.isRunning(); l += 16) {
-                    if (Math.abs(k) + Math.abs(l) > 300) continue;
-                    count++;
-                }
-            }
-            for (int k = -192; k <= 192 && this.isRunning(); k += 16) {
-                for (int l = -192; l <= 192 && this.isRunning(); l += 16) {
-                    if (Math.abs(k) + Math.abs(l) > 300) continue;
                     long i1 = now();
 
                     if (i1 - j > 1000L) {
-                        this.a_("Preparing spawn area", i * 1000 / count / 10.0);
+                        this.a_("Preparing spawn area", i * 100 / 625);
                         j = i1;
                     }
 
@@ -462,13 +454,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     protected void a_(String s, int i) {
         this.e = s;
         this.f = i;
-        // CraftBukkit - Use FQN to work around decompiler issue
-        MinecraftServer.i.info(s + ": " + i + "%");
-    }
-
-    protected void a_(String s, double i) {
-        this.e = s;
-        this.f = (int) i;
         // CraftBukkit - Use FQN to work around decompiler issue
         MinecraftServer.i.info(s + ": " + i + "%");
     }
@@ -561,7 +546,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
     public void run() {
         final Thread main = Thread.currentThread();
-/*
+
         Thread monitor = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -573,7 +558,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                 int count = 10;
                 while (main.isAlive()) {
                     long busyTime = now() - runStart;
-                    if (busyTime > 50L && count < 10) {
+                    if (busyTime > 100L && count < 10) {
                         StringBuilder sb = new StringBuilder(400);
                         count++;
                         sb.append(count).append(": ").append(main).append(" is busy for ").append(busyTime).append("ms\n");
@@ -586,7 +571,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                         count = 0;
                     }
                     try {
-                        Thread.sleep(25);
+                        Thread.sleep(50);
                     } catch (InterruptedException e) {
                         throw new AssertionError(e);
                     }
@@ -594,7 +579,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             }
         }, "monitor-thread");
         monitor.setDaemon(true);
-*/
 
         try {
             if (this.init()) {
@@ -635,7 +619,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                     }
                     started = runStart;
                     runStart = Long.MAX_VALUE;
-                    if (j < 50)
+                    if (j > 0 && j < 50)
                         Thread.sleep(Math.max(1L, 50L - j));
                     this.O = true;
                 }

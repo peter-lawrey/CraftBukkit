@@ -104,6 +104,11 @@ public class WorldGenVillageBlacksmith
         a(world, Blocks.THIN_GLASS, 0, 2, 2, 6, box);
         a(world, Blocks.THIN_GLASS, 0, 4, 2, 6, box);
 
+        a(world, Blocks.TORCH, 0, 0, 3, 2, box);
+        a(world, Blocks.TORCH, 0, 0, 3, 4, box);
+        a(world, Blocks.TORCH, 0, 2, 3, 6, box);
+        a(world, Blocks.TORCH, 0, 4, 3, 6, box);
+
 
         a(world, Blocks.FENCE, 0, 2, 1, 4, box);
         a(world, Blocks.WOOD_PLATE, 0, 2, 2, 4, box);

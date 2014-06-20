@@ -388,15 +388,15 @@ public abstract class StructurePiece {
         }
     }
 
-    protected void a(World world, StructureBoundingBox box, int x1, int y1, int z1, int x2, int y2, int z2, Block b1, int p1, Block b2, int p2, boolean flag) {
+    protected void a(World world, StructureBoundingBox box, int x1, int y1, int z1, int x2, int y2, int z2, Block rim, int p1, Block inner, int p2, boolean flag) {
         for (int y = y1; y <= y2; y++) {
             for (int x = x1; x <= x2; x++) {
                 for (int z = z1; z <= z2; z++) {
                     if ((!flag) || (a(world, x, y, z, box).getMaterial() != Material.AIR)) {
                         if ((y == y1) || (y == y2) || (x == x1) || (x == x2) || (z == z1) || (z == z2)) {
-                            a(world, b1, p1, x, y, z, box);
+                            a(world, rim, p1, x, y, z, box);
                         } else {
-                            a(world, b2, p2, x, y, z, box);
+                            a(world, inner, p2, x, y, z, box);
                         }
                     }
                 }

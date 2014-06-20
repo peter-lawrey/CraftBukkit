@@ -173,18 +173,27 @@ abstract class WorldGenVillagePiece extends StructurePiece {
     }
 
     protected void a(World world, StructureBoundingBox box, int x1, int y1, int z1, int x2, int y2, int z2, Block block, Block block1, boolean flag) {
-        Block block2 = this.b(block, 0);
-        int k1 = this.c(block, 0);
-        Block block3 = this.b(block1, 0);
-        int l1 = this.c(block1, 0);
+        Block rim = this.b(block, 0);
+        int o1 = this.c(block, 0);
+        Block inner = this.b(block1, 0);
+        int o2 = this.c(block1, 0);
 
-        super.a(world, box, x1, y1, z1, x2, y2, z2, block2, k1, block3, l1, flag);
+        super.a(world, box, x1, y1, z1, x2, y2, z2, rim, o1, inner, o2, flag);
     }
 
-    protected void b(World world, Block block, int i, int j, int k, int l, StructureBoundingBox structureboundingbox) {
+    protected void b(World world, Block block, int i, int j, int k, int l, StructureBoundingBox box) {
         Block block1 = this.b(block, i);
         int i1 = this.c(block, i);
 
-        super.b(world, block1, i1, j, k, l, structureboundingbox);
+        super.b(world, block1, i1, j, k, l, box);
+    }
+
+    public void addStairs(World world, StructureBoundingBox box) {
+        for (int s = 0; s < k - 10; s++) {
+            if (a(world, 2, 0 - s, -1 - s, box).getMaterial() != Material.AIR) {
+                break;
+            }
+            a(world, Blocks.COBBLESTONE_STAIRS, a(Blocks.COBBLESTONE_STAIRS, 3), 2, 0 - s, -1 - s, box);
+        }
     }
 }

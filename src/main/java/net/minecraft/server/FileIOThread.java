@@ -30,7 +30,7 @@ public class FileIOThread
             boolean bool = localIAsyncChunkSaver.c();
             if (!bool) {
                 this.b.remove(i--);
-                this.d += 1L;
+                this.d++;
             }
 
             try {
@@ -58,18 +58,24 @@ public class FileIOThread
         if (this.b.contains(paramIAsyncChunkSaver)) {
             return;
         }
-        this.c += 1L;
+        this.c++;
         this.b.add(paramIAsyncChunkSaver);
     }
 
     public void a() {
+
         this.e = true;
-        synchronized (this) {
-            notify();
-        }
+
+        int counter = 0;
         while (this.c != this.d) {
+            synchronized (this) {
+                notify();
+            }
+            if (counter == 20)
+                new Throwable().printStackTrace();
             try {
-                Thread.sleep(10L);
+                if (++counter > 21) counter = 21;
+                Thread.sleep(counter);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
